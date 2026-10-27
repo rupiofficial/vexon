@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History</title>
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<div class="head"><div class="head-in">
+  <h1>History</h1>
+  <label class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Search history" autofocus>
+  </label>
+  <button class="btn danger" id="clear">Clear history</button>
+</div></div>
+<main id="list"></main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const GLOBE = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>';
+const TRASH = '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>';
+let api, timer;
+
+function dayLabel(d) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
+  if (diff === 0) return 'Today - ' + d.toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric'});
+  if (diff === 1) return 'Yesterday - ' + d.toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric'});
+  return d.toLocaleDateString(undefined, {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
+}
+const hostOf = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } };
+const icon = v => v.icon ? `<img src="${esc(v.icon)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:GLOBE}))">` : GLOBE;
+
+async function load() {
+  const q = $('#q').value.trim();
+  const rows = await api.browsing_history(q, 500);
+  const box = $('#list');
+  if (!rows.length) { box.innerHTML = `<div class="empty">${q ? 'No matching pages.' : 'No browsing history yet. Pages you visit show up here.'}</div>`; return; }
+  let html = '', current = null;
+  for (const v of rows) {
+    const d = new Date(v.visited), label = dayLabel(d);
+    if (label !== current) { if (current !== null) html += '</div>'; html += `<div class="day">${esc(label)}</div><div class="card">`; current = label; }
+    html += `<div class="row" data-id="${v.id}">
+      <span class="time">${d.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'})}</span>
+      <span class="ico">${icon(v)}</span>
+      <a class="main" href="${esc(v.url)}" title="${esc(v.url)}"><span class="t">${esc(v.title || hostOf(v.url))}</span><span class="u">${esc(hostOf(v.url))}</span></a>
+      <span class="acts"><button class="ib" data-del title="Remove from history" aria-label="Remove from history">${TRASH}</button></span></div>`;
+  }
+  box.innerHTML = html + '</div>';
+}
+$('#list').addEventListener('click', async e => {
+  const del = e.target.closest('[data-del]'); if (!del) return;
+  await api.delete_visit(+del.closest('.row').dataset.id); load();
+});
+$('#q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(load, 150); });
+$('#clear').onclick = async () => {
+  const b = $('#clear');
+  if (!b.dataset.armed) {
+    b.dataset.armed = 1; b.textContent = 'Click again to confirm';
+    setTimeout(() => { delete b.dataset.armed; b.textContent = 'Clear history'; }, 3000);
+    return;
+  }
+  delete b.dataset.armed; b.textContent = 'Clear history';
+  await api.clear_browsing_history(); load();
+};
+window.onEngineEvent = event => { if (event === 'history') load(); };
+window.addEventListener('pywebviewready', () => { api = window.pywebview.api; load(); });
+</script>
+</body>
+</html>

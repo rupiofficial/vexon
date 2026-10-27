@@ -1,0 +1,57 @@
+/* Shared look of the browser's internal pages (New Tab, History, Bookmarks). */
+/* Vexon palette: purple #A855F7, cyan #00E5FF, ink #0A0A0C, white (deeper purple/cyan on white
+   so text keeps its contrast). */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff; --panel: #ffffff; --text: #0a0a0c; --muted: #5c5c6b; --faint: #8b8b9a; --line: #e3deee;
+  --accent: #9333ea; --cyan: #00b8d4; --accent-soft: #f1e6fd; --hover: rgba(10,10,12,.06); --field: #f3f0f9;
+  --rec: #d92b4b; --ok: #0891b2; --warn: #d97706; --shadow: 0 1px 3px rgba(60,40,100,.2);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0c; --panel: #131318; --text: #f4f4f8; --muted: #a3a3b2; --faint: #6f6f80; --line: #262630;
+    --accent: #a855f7; --cyan: #00e5ff; --accent-soft: #2b1a45; --hover: rgba(255,255,255,.07); --field: #17171d;
+    --rec: #ff5c7a; --ok: #00e5ff; --warn: #ffc857; --shadow: 0 1px 3px rgba(0,0,0,.6);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--bg); color: var(--text); font: 14px/1.5 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+svg { display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+input { font: inherit; color: var(--text); }
+.hidden { display: none !important; }
+
+/* manager pages (history, bookmarks) */
+.head { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.head-in { max-width: 920px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+.head h1 { font-size: 22px; font-weight: 500; margin: 0; flex: 0 0 auto; }
+.search { flex: 1; max-width: 560px; margin-left: auto; height: 40px; border-radius: 20px; background: var(--field);
+  display: flex; align-items: center; gap: 10px; padding: 0 16px; color: var(--muted); }
+.search:focus-within { background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
+.search svg { width: 18px; height: 18px; flex: none; }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; }
+.btn { height: 36px; padding: 0 16px; border-radius: 18px; border: 1px solid var(--line); color: var(--accent); font-weight: 500; }
+.btn:hover { background: var(--accent-soft); }
+.btn.danger { color: var(--rec); }
+main { max-width: 920px; margin: 0 auto; padding: 8px 24px 64px; }
+.day { font-size: 14px; font-weight: 500; margin: 24px 0 8px; color: var(--text); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 8px 0 16px; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--hover); }
+.row .time { width: 62px; flex: none; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.row .ico { width: 20px; height: 20px; flex: none; display: grid; place-items: center; color: var(--muted); }
+.row .ico img { width: 16px; height: 16px; border-radius: 3px; }
+.row .ico svg { width: 16px; height: 16px; }
+.row .main { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 12px; }
+.row .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .u { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+.row .acts { display: flex; gap: 2px; opacity: 0; }
+.row:hover .acts, .row:focus-within .acts { opacity: 1; }
+.ib { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+.ib:hover { background: var(--hover); color: var(--text); }
+.ib svg { width: 16px; height: 16px; }
+.empty { padding: 56px 20px; text-align: center; color: var(--muted); }
+.rename { flex: 1; height: 32px; border: 1px solid var(--accent); border-radius: 8px; padding: 0 10px; background: var(--bg); outline: 0; }
